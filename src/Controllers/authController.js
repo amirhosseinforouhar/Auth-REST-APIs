@@ -1,41 +1,43 @@
 const User = require("../Models/Users")
 const {StatusCodes} = require("http-status-codes")
+const ConflictError = require("../Errors/conflict")
+const BadRequestError = require("../Errors/badRequest")
+const UnAuthenticatedError = require("../Errors/unAuthenticated")
 
-const register = async (req , res) => {
+const register = async (req , res , next) => {
     try {
        // check email already exist 
         const existEmail = await User.findOne({email : req.body.email})
-        if (existEmail) {
-            return res.status(StatusCodes.CONFLICT).json({message : "Email already exist"})
-        }
+        if (existEmail) throw new ConflictError("Email already exist")
 
         const user = await User.create({...req.body})
         res.status(StatusCodes.CREATED).json({user})
 
    } catch (error) {
-       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message : error.message})
+       
+        next(error)
    }
 
 }
 
-const login = async (req , res) => {
+const login = async (req , res , next) => {
     const {email , password} = req.body
-    if(!email || !password) {
-        return res.status(StatusCodes.BAD_REQUEST).json({message : "Please provide email and password"})
-    }
-
+    
     try {
+        if(!email || !password) throw new BadRequestError("Please provide email and password")
+
         const user = await User.findOne({email})
-        if (!user) return res.status(StatusCodes.NOT_FOUND).json({message : "wrong email"})
+        if (!user) throw new UnAuthenticatedError("wrong email")
 
         const isPasswordCorrect = await user.comparePassword(password)
-        if(!isPasswordCorrect) return res.status(StatusCodes.NOT_FOUND).json({message : "wrong password"})
+        if(!isPasswordCorrect) throw new UnAuthenticatedError("wrong password")
 
         const token = await user.createJwt()
 
         res.json({user , token})
     } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message : error.message})
+
+        next(error)
     }
 }
 

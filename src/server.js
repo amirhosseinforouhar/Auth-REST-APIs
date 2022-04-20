@@ -2,6 +2,7 @@ const express = require('express');
 const helmet = require("helmet")
 const connectDB = require('./db/connectDB');
 const authMiddleWare = require('./Middlewares/authMiddleWare');
+const errorHandlerMiddleWare = require("./Middlewares/errorHandlerMiddleWare")
 const authRouter = require("./Routes/auth")
 const dashboardRouter = require("./Routes/dashboard")
 
@@ -13,6 +14,8 @@ app.use(helmet())
 
 app.use("/auth" , authRouter)
 app.use("/dashboard" , authMiddleWare , dashboardRouter)
+
+app.use(errorHandlerMiddleWare)
 
 const PORT = process.env.PORT || 3000 
 const start = async () => {
