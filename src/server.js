@@ -1,32 +1,30 @@
-const express = require('express');
-const helmet = require("helmet")
-const connectDB = require('./db/connectDB');
-const authMiddleWare = require('./Middlewares/authMiddleWare');
-const errorHandlerMiddleWare = require("./Middlewares/errorHandlerMiddleWare")
-const authRouter = require("./Routes/auth")
-const dashboardRouter = require("./Routes/dashboard")
+const express = require("express");
+const connectDB = require("./db/connectDB");
+const authMiddleWare = require("./Middlewares/authMiddleWare");
+const errorHandlerMiddleWare = require("./Middlewares/errorHandlerMiddleWare");
+const helmet = require("helmet");
+const authRouter = require("./Routes/auth");
+const dashboardRouter = require("./Routes/dashboard");
 
-const app = express ()
-require("dotenv").config({path : `${__dirname}/Configs/config.env`})
+const app = express();
+require("dotenv").config({ path: `${__dirname}/Configs/config.env` });
 
-app.use(express.json())
-app.use(helmet())
+// middlewares 
+app.use(express.json());
+app.use(helmet());
 
-app.use("/auth" , authRouter)
-app.use("/dashboard" , authMiddleWare , dashboardRouter)
+// routes 
+app.use("/auth", authRouter);
+app.use("/dashboard", authMiddleWare, dashboardRouter);
 
-app.use(errorHandlerMiddleWare)
+// error handler middleware 
+app.use(errorHandlerMiddleWare);
 
-const PORT = process.env.PORT || 3000 
-const start = async () => {
-    try {
-        await connectDB(process.env.MONGODB_URI)
+// database connection 
+connectDB()
 
-        app.listen(PORT , () => {
-            console.log(`server running on port ${PORT}...`);
-        })
-    } catch (error) {
-        console.log(error);
-    }
-}
-start()
+// start server 
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`server running on port ${PORT}...`);
+});

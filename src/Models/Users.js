@@ -9,6 +9,7 @@ const userSchema = new Schema({
         type : String , 
         required : [true , "Please provide username"] , 
         minlength : 3 ,
+        trim : true , 
         maxlength : 25 
     }, 
     email : {
@@ -22,6 +23,7 @@ const userSchema = new Schema({
         type : String , 
         required : [true , "Please provide password"] , 
         minlength  : 6 , 
+        trim : true 
 
     }
 })
@@ -36,8 +38,16 @@ userSchema.methods.comparePassword = function (password) {
     return bcrypt.compare(password , this.password)
 }
 
-userSchema.methods.createJwt = function () {
-    return jwt.sign({userId : this._id , username : this.username} , process.env.SECRET_KEY)
+userSchema.methods.createAccessToken = function () {
+    return jwt.sign({userId : this._id , username : this.username} , process.env.SECRET_KEY , {
+        expiresIn : process.env.ACCESS_TOKEN_LIFE_TIME
+    })
+}
+
+userSchema.methods.createRefreshToken = function () {
+    return jwt.sign({userId : this._id , username : this.username} , process.env.REFRESH_TOKEN_SECRET_KEY , {
+        expiresIn : process.env.REFRESH_TOKEN_LIFE_TIME
+    })
 }
 
 const User = mongoose.model("users" , userSchema)

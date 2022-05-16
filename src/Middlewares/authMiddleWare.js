@@ -5,7 +5,7 @@ const User = require("../Models/Users")
 const authMiddleWare = async (req , res , next) => {
     const authHeader = req.headers.authorization 
     if(!authHeader || !authHeader.startsWith("Bearer")) {
-        return res.status(StatusCodes.FORBIDDEN).json({message : "Please provide a valid token"})
+        return res.status(StatusCodes.FORBIDDEN).json({message : "You need to sign in "})
     }
     const token = authHeader.split(" ") [1]
 
