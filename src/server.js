@@ -3,6 +3,7 @@ const connectDB = require("./db/connectDB");
 const authMiddleWare = require("./Middlewares/authMiddleWare");
 const errorHandlerMiddleWare = require("./Middlewares/errorHandlerMiddleWare");
 const helmet = require("helmet");
+const cookieParser = require("cookie-parser")
 const authRouter = require("./Routes/auth");
 const dashboardRouter = require("./Routes/dashboard");
 
@@ -11,6 +12,7 @@ require("dotenv").config({ path: `${__dirname}/Configs/config.env` });
 
 // middlewares 
 app.use(express.json());
+app.use(cookieParser())
 app.use(helmet());
 
 // routes 

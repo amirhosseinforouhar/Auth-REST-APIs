@@ -5,10 +5,11 @@ const BadRequestError = require("../Errors/badRequest")
 const UnAuthenticatedError = require("../Errors/unAuthenticated")
 const jwt = require("jsonwebtoken")
 const asyncWrapper = require("./asyncWrapper")
+const sendJwtInCookie = require("../utils/jwt")
 
 const register = asyncWrapper(async (req , res , next) => {
     // check email already exist 
-    const existEmail = await User.findOne({email : req.body.email})
+    const existEmail = await User.exists({email : req.body.email})
     if (existEmail) throw new ConflictError("Email already exist")
 
     const user = await User.create({...req.body})
@@ -28,10 +29,13 @@ const login = asyncWrapper( async (req , res , next) => {
     const isPasswordCorrect = await user.comparePassword(password)
     if(!isPasswordCorrect) throw new UnAuthenticatedError("wrong password")
 
+    // send jwt in cookie 
     const accessToken = await user.createAccessToken()
     const refreshToken = await user.createRefreshToken()
 
-    res.json({user , accessToken , refreshToken})
+    sendJwtInCookie(res , accessToken , refreshToken)
+
+    res.json({user})
 
 })
 
@@ -47,8 +51,7 @@ const refreshToken = asyncWrapper(async (req , res , next) => {
     if(!user) throw new UnAuthenticatedError("User not found")
     
     const accessToken = await user.createAccessToken() 
-    const newRefreshToken = await user.createRefreshToken ()
-    res.json({accessToken , refreshToken : newRefreshToken})
+    res.json({accessToken , refreshToken})
 
 })
 module.exports = {
